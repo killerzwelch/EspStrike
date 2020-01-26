@@ -32,10 +32,10 @@ void Config::readXml(vector<String> xml) {
       if(firstSpace > -1 and firstSpace < endpos)
       {
           //There may be a parameter
-          parameterString = xml[i].substring(firstSpace+1,endpos - firstSpace -1);
+          parameterString = xml[i].substring(firstSpace+1,endpos);
           endpos = firstSpace;
       }
-      String tagName = xml[i].substring(startpos+1, endpos - startpos -1);
+      String tagName = xml[i].substring(startpos+1, endpos);
       if(System::printSerial) {
         Serial.println("tagName: '" + tagName + "' endTag? " + String(endTag));
         Serial.println("parameter: '" + parameterString + "'");
@@ -63,7 +63,7 @@ void Config::readXml(vector<String> xml) {
           ptr=&System::on_Death;
           playerConfigSwitch=false;
       }
-      else if(tagName == "player") {
+      else if(tagName == "player" && endTag==0) {
           ptr=0x0;
           if(System::printSerial) {
             Serial.println("found player tag");
@@ -96,7 +96,9 @@ void Config::readXml(vector<String> xml) {
           }
       }
   }
-
+  if(Player::health>0) {
+    System::configReceived=true;
+  }
 }
 
 /*Method to parse the parameter string in XML*/
@@ -130,8 +132,8 @@ vector<Parameter_t> Config::handleParameter(String parameterString)
         endpos = parameterString.indexOf(" ",startpos);
       }
       params.push_back(Parameter_t());
-      params[i].parameterKey=parameterString.substring(startpos,dividor-startpos);
-      params[i].parameterValue=parameterString.substring(startValue+1,endpos - startValue-1);
+      params[i].parameterKey=parameterString.substring(startpos,dividor);
+      params[i].parameterValue=parameterString.substring(startValue+1,endpos);
       if(System::printSerial) {
         Serial.println(" parameter_t " + String(i+1) + ": '" + params[i].parameterKey + "' : '" + params[i].parameterValue + "'");
       }
@@ -145,12 +147,18 @@ vector<String> Config::splitXML(String xml) {
     int i=0;
     while(lastpos > -1) {
         ret.push_back(String());
-        ret[i]=xml.substring(lastpos,xml.indexOf(">",lastpos) - lastpos+1);
+        ret[i]=xml.substring(lastpos,xml.indexOf(">",lastpos+1));
         lastpos=xml.indexOf("<",lastpos+1);
         i++;
     }
     return ret;
 }
+
+void Config::readXml(String xml) {
+  vector<String> conf = Config::splitXML(xml);
+  Config::readXml(conf);
+}
+
 
 void Config::evalConfigTag(String tag, vector<Parameter_t> params) {
 
@@ -161,6 +169,12 @@ void Config::evalConfigTag(String tag, vector<Parameter_t> params) {
         }            
         else if(tag == __KEY__LIFE__ && params[i].parameterKey == __KEY__VAL__) {
             Player::life = params[i].parameterValue.toInt();
+        }
+        else if(tag == __KEY__PLAYER__ && params[i].parameterKey == __KEY__VAL__) {
+            Player::player = params[i].parameterValue.toInt();
+        }
+        else if(tag == __KEY__TEAM__ && params[i].parameterKey == __KEY__VAL__) {
+            Player::team = params[i].parameterValue.toInt();
         }
         else
         {

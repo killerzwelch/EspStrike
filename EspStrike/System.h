@@ -12,6 +12,8 @@ class System {
         static ActionList_t on_Hit_interrupts;
         static ActionList_t on_LifeLoss;
         static ActionList_t on_Death;
+        static bool configReceived; //Flag that system only starts up when server has send configuration
+        static String ipaddress; //Flag that system only starts up when server has send configuration
 };
 
 

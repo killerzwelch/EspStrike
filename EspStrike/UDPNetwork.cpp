@@ -29,7 +29,7 @@ void UDPNetwork::sendBroadcast(){
 }
 
 void UDPNetwork::repeatBroadcast(String messageId, String messageText) {
-  Serial.println("Resending message '" + messageId + "'" + messageText);
+  Serial.println("Resending message '" + messageId + "|" + messageText +"'");
   sendMessage(messageId, messageText);
 }
 
@@ -37,8 +37,12 @@ void UDPNetwork::udpListen() {
   int packetSize = udp.parsePacket();
   if (packetSize) {
     udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
-    Serial.println(packetBuffer);
-    UDPNetwork::resendMessage(String(packetBuffer));
+    String message = String(packetBuffer);
+    for(int i =0;i<message.length()+1;i++) {
+          packetBuffer[i]='\0';
+    }
+    Serial.println("Received: '" + message + "'");
+    UDPNetwork::resendMessage(message);
   }
 }
 
@@ -68,6 +72,7 @@ void UDPNetwork::sendMessage(String messageid, String address, String message) {
   udp.beginPacket(bcAdress, udpPort);
   udp.write(tmpArr, str_len);
   udp.endPacket(); 
+  tmpArr=(unsigned char*)String("").c_str();
 }
 
 void UDPNetwork::addMessageToBuffer(String messageId)

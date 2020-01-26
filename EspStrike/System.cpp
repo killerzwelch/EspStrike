@@ -11,3 +11,5 @@ ActionList_t System::on_Tick;
 ActionList_t System::on_Hit_interrupts;
 ActionList_t System::on_LifeLoss;
 ActionList_t System::on_Death;
+bool System::configReceived=false;
+String System::ipaddress;

@@ -4,6 +4,7 @@
 #include "Http.h"
 #include "System.h"
 #include "UDPNetwork.h"
+#include "Display.h"
 
 using namespace std;
 
@@ -25,6 +26,8 @@ void setup() {
   WiFi.begin(ssid, password);
   Serial.println("");
 
+  Display::init();
+  
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -36,8 +39,10 @@ void setup() {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  System::ipaddress=WiFi.localIP().toString();
+  Display::startup();
   //Initialize UDP functionality and send Broadcast
-  UDPNetwork::init(WiFi.localIP().toString());
+  UDPNetwork::init(System::ipaddress);
   UDPNetwork::sendBroadcast();
 
   if (MDNS.begin("esp32")) {
@@ -54,5 +59,6 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   webserver.loop();
+  Display::printPlayer();
   UDPNetwork::udpListen();
 }

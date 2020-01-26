@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Http.h"
 #include <vector>
+#include "Config.h"
 
 using namespace std;
 
@@ -10,6 +11,8 @@ int HTTP::messageBufferSize=0;
 struct messageBuffer_t HTTP::messageBuffer;
 int HTTP::messageCounter;
 struct messageBuffer_t* HTTP::lastMessage = &messageBuffer;
+
+static String xmlConf = "";
 
 void HTTP::callURL(String URL) {
   if((WiFi.isConnected()== true)) {
@@ -25,6 +28,7 @@ void HTTP::callURL(String URL) {
             // file found at server
             if(httpCode == HTTP_CODE_OK) {
                 String payload = http.getString();
+                xmlConf=payload;
                 Serial.println(payload);
             }
         } else {
@@ -58,6 +62,11 @@ void HTTP::loadConfig(){
   server.send(200, "text/html", "");
   remoteURL = parseURL(remoteURL);
   callURL(remoteURL);
+  if(!xmlConf.equals("")) {
+    Config config;
+    config.readXml(xmlConf);
+    xmlConf="";
+  }
 }
 /*
 %20 <SPACE>
